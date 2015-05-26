@@ -100,8 +100,9 @@ with captured_templates(app) as templates:
     assert rv.status_code == 200
     assert len(templates) == 1
     template, context = templates[0]
-    assert template.name == 'index.html'
-    assert len(context['items']) == 10
+    print template, context
+    assert template.name == 'show_entries.html'
+    assert len(context['entries']) > 0
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8683)
