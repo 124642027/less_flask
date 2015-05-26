@@ -44,7 +44,6 @@ def teardown_request(exception):
 def show_entries():
     cur = g.db.execute('select title, text from entries order by id desc')
     entries = [dict(title=row[0], text=row[1]) for row in cur.fetchall()]
-    print entries
     return render_template('show_entries.html', entries=entries)
 
 @app.route('/add', methods=['POST'])
@@ -76,6 +75,33 @@ def logout():
     session.pop("logged_in", None)
     flash("You are logged out")
     return redirect(url_for('show_entries'))
+
+"""
+每当模板被渲染成功后，就会发送信号，执行connect调用的函数
+"""
+# template_rendered还渲染信号方法
+from flask import template_rendered
+# contextmanager是构造with使用结构的装饰器；以后想使用with返回一堆值，
+# 然后最后进行收尾工作；可以使用这个装饰器
+from contextlib import contextmanager
+@contextmanager
+def captured_templates(app):
+    recorded = []
+    def record(sender, template, context, **extra):
+        recorded.append((template, context))
+    template_rendered.connect(record, app)
+    try:
+        yield recorded
+    finally:
+        template_rendered.disconnect(record, app)
+
+with captured_templates(app) as templates:
+    rv = app.test_client().get('/')
+    assert rv.status_code == 200
+    assert len(templates) == 1
+    template, context = templates[0]
+    assert template.name == 'index.html'
+    assert len(context['items']) == 10
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8683)
