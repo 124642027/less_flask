@@ -14,10 +14,45 @@ SECRET_KEY = 'development key'
 USERNAME = 'admin'
 PASSWORD = 'default'
 
+# mail
+ADMINS = ['mail@sina.com']
 
 # create little application
 app = Flask(__name__)
 app.config.from_object(__name__)
+
+if not app.debug:
+    import logging
+    from logging import Formatter
+    from logging.handlers import SMTPHandler
+    mail_handler = SMTPHandler(mailhost="smtp",
+                               fromaddr="发件人",
+                               toaddrs="收件人",
+                               credentials=("username", "passwd"),
+                               subject="youyou")
+    mail_handler.setFormatter(Formatter("""
+    Message type:          %(levelname)s
+    Location:              %(pathname)s:%(lineno)d
+    Module:                %(module)s
+    Function:              %(funcName)s
+    Time:                  %(asctime)s
+
+    Message:
+    %(message)s
+    """
+    ))
+    mail_handler.setLevel(logging.ERROR)
+    app.logger.addHandler(mail_handler)
+
+    from logging.handlers import RotatingFileHandler
+    file_handler = RotatingFileHandler("flaskr.log", maxBytes=1024000)
+    file_handler.setFormatter(Formatter(
+    '%(asctime)s %(levelname)s: %(message)s '
+    '[in %(pathname)s:%(lineno)d]'
+    ))
+    file_handler.setLevel(logging.INFO)
+    app.logger.addHandler(file_handler)
+
 
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
@@ -105,4 +140,4 @@ with captured_templates(app) as templates:
     assert len(context['entries']) > 0
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8683)
+    app.run(host="0.0.0.0", port=8683, debug=False)
