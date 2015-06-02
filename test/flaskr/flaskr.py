@@ -5,21 +5,19 @@ import sqlite3
 from flask import Flask, request, session, g, redirect, url_for, \
         abort, render_template, flash
 from contextlib import closing
-
-
-# configuration
-DATABASE = 'flaskr.db'
-DEBUG = True
-SECRET_KEY = 'development key'
-USERNAME = 'admin'
-PASSWORD = 'default'
-
-# mail
-ADMINS = ['mail@sina.com']
+import argparse
+parser = argparse.ArgumentParser(description='run the app')
+parser.add_argument('-e', '--env', type=str, help="choose environment", default="test")
+args = parser.parse_args()
 
 # create little application
 app = Flask(__name__)
-app.config.from_object(__name__)
+
+# app.config.from_object(__name__)
+if args.env == "product":
+    app.config.from_object('conf.product')
+else:
+    app.config.from_object('conf.test')
 
 if not app.debug:
     import logging
