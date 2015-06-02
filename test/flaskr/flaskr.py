@@ -117,6 +117,13 @@ from flask import template_rendered
 # contextmanager是构造with使用结构的装饰器；以后想使用with返回一堆值，
 # 然后最后进行收尾工作；可以使用这个装饰器
 from contextlib import contextmanager
+
+# 信号使用的简洁方式,每当模板渲染后执行print
+# @template_rendered.connect_via(app)
+# def when_template_rendered(app, template, context, **extra):
+#     print 'Template %s is rendered with %s' % (template.name, context)
+
+# 信号使用的原始方式
 @contextmanager
 def captured_templates(app):
     recorded = []
