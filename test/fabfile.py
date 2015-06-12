@@ -2,8 +2,8 @@ __author__ = 'liht'
 
 # !/usr/bin/env python
 # -*-coding:utf-8 -*-
-# È·±£ÓÃ»§µÇÂ¼µÄÈ¨ÏŞ
-# gatewayÉèÖÃÌø°å»ú
+# ç¡®ä¿ç”¨æˆ·ç™»å½•çš„æƒé™
+# gatewayè®¾ç½®è·³æ¿æœº
 
 from fabric.api import *
 
