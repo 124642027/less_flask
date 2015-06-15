@@ -34,3 +34,35 @@ def add_language_code(endpoint, values):
 @bp.url_value_preprocessor
 def pull_lang_code(endpoint, values):
     g.lang_code = values.pop('lang_code', None)
+
+# 实现url的延迟加载
+from werkzeug import import_string, cached_property
+
+
+class LazyView(object):
+    def __init__(self, import_name):
+        print "*" * 30
+        # add_url_rule如果没有传入endpoint的值，那么程序会回去view_fun指向的__name__
+        # 所以这里面给__name__赋值
+        self.__module__, self.__name__ = import_name.rsplit('.', 1)
+        self.import_name = import_name
+
+    @cached_property
+    def view(self):
+        print "=" * 30
+        return import_string(self.import_name)
+
+    # __call__实现的是方法的调用时的动作，本处是view_func执行时的动作;
+    def __call__(self, *args, **kwargs):
+        print "&" * 30
+        return self.view(*args, **kwargs)
+
+
+# 在app启动的时候，只加载LazyView的__init__方法,只有在有http请求的时候，才调用view方法，
+# 这样可以让view在有http请求的时候才加载
+app.add_url_rule('/hello',
+                 view_func=LazyView('hello_app.views.hello'))
+
+
+def hello():
+    return "hello"

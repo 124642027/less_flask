@@ -71,6 +71,8 @@ class ShowEntries(View):
 
 # 动态的添加handler入口，和@router效果一致
 app.add_url_rule('/', view_func=ShowEntries.as_view('show_entries'))
+# some_func路径指向app是flaskr的views文件中的somefunc这个函数
+# app.add_url_rule('/some_func', view_func=flaskr.views.somefunc)
 
 # 基于http方法(GET/POST)的调度,将http请求的方法和类中定义的方法匹配，做对应的动作，restfull api
 '''
@@ -130,6 +132,7 @@ def login():
             return redirect(url_for('show_entries'))
     return render_template('login.html', error=error)
 
+from werkzeug.contrib.cache import MemcachedCache
 
 @app.route('/logout')
 def logout():

@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*-coding:utf-8-*-
 '''
-定义一个异常类，格式化异常返回格式
+瀹氫箟涓�涓紓甯哥被锛屾牸寮忓寲寮傚父杩斿洖鏍煎紡
 '''
 
 class InvalidUsage(Exception):
