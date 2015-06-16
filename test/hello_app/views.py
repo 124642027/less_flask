@@ -57,7 +57,6 @@ class LazyView(object):
         # print "&" * 30
         return self.view(*args, **kwargs)
 
-
 # 在app启动的时候，只加载LazyView的__init__方法,只有在有http请求的时候，才调用view方法，
 # 这样可以让view在有http请求的时候才加载
 app.add_url_rule('/hello',
@@ -67,12 +66,14 @@ app.add_url_rule('/hello',
 def hello():
     return "hello"
 
+
 import os
 from flask import send_from_directory
 
+
 @app.route('/aa.jpg')
 def favicon():
-    #提供展示静态文件方式，eg:图片，文件等
+    # 提供展示静态文件方式，eg:图片，文件等
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'aa.jpg', mimetype='image/vnd.microsoft.icon')
 
@@ -89,4 +90,39 @@ def generate_large_csv():
         yield 'hello \n'
         yield 'world \n'
         yield '!'
+
     return Response(stream_with_context(generate()), mimetype='text/csv')
+
+
+# 下面这段代码个人觉得比较帅，主要处理了在请求的时候如何保存response时要做的事
+# 因为在请求的时候还没有response对象，所以用到了全局对象g，保存response时的动作
+
+# 首先http请求发起前，执行detect_user_language方法,接着如果lanuage为None执行after_this_request这个装饰器函数，
+# 将修饰的方法保存到g中，然后执行g.language=language
+# 最后请求结束后，执行到after_request装饰的方法，获取g中存储的function，回调这些方法
+def after_this_request(f):
+    if not hasattr(g, 'after_request_callbacks'):
+        g.after_request_callbacks = []
+    g.after_request_callbacks.append(f)
+    return f
+
+@app.after_request
+def call_after_request_callbacks(response):
+    for callback in getattr(g, 'after_request_callbacks', ()):
+        callback(response)
+    return response
+
+
+from flask import request
+
+
+@app.before_request
+def detect_user_language():
+    language = request.cookies.get('user_lang3')
+    if language is None:
+        language = "zh_cn"
+
+        @after_this_request
+        def remember_language(response):
+            response.set_cookie('user_lang3', language)
+    g.language = language
