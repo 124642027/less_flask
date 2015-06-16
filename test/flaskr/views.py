@@ -149,10 +149,12 @@ from flask import template_rendered
 # 然后最后进行收尾工作；可以使用这个装饰器
 from contextlib import contextmanager
 
-# 信号使用的简洁方式,每当模板渲染后执行print
+# 信号使用的简洁方式,每当模板渲染后执行print,template_rendered是flask的核心信号
 # @template_rendered.connect_via(app)
 # def when_template_rendered(app, template, context, **extra):
 #     print 'Template %s is rendered with %s' % (template.name, context)
+
+from flask import template_rendered
 
 # 信号使用的原始方式
 # @contextmanager

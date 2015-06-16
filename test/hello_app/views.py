@@ -2,7 +2,7 @@
 # -*-coding:utf-8
 
 from hello_app import app
-from flask import jsonify, g, Blueprint
+from flask import jsonify, g, Blueprint, url_for
 from define_exception import InvalidUsage
 
 bp = Blueprint('frontend', __name__, url_prefix='lang_code')
@@ -66,3 +66,12 @@ app.add_url_rule('/hello',
 
 def hello():
     return "hello"
+
+import os
+from flask import send_from_directory
+
+@app.route('/aa.jpg')
+def favicon():
+    #提供展示静态文件方式，eg:图片，文件等
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'aa.jpg', mimetype='image/vnd.microsoft.icon')
