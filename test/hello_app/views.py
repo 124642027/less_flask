@@ -41,7 +41,7 @@ from werkzeug import import_string, cached_property
 
 class LazyView(object):
     def __init__(self, import_name):
-        print "*" * 30
+        # print "*" * 30
         # add_url_rule如果没有传入endpoint的值，那么程序会回去view_fun指向的__name__
         # 所以这里面给__name__赋值
         self.__module__, self.__name__ = import_name.rsplit('.', 1)
@@ -49,12 +49,12 @@ class LazyView(object):
 
     @cached_property
     def view(self):
-        print "=" * 30
+        # print "=" * 30
         return import_string(self.import_name)
 
     # __call__实现的是方法的调用时的动作，本处是view_func执行时的动作;
     def __call__(self, *args, **kwargs):
-        print "&" * 30
+        # print "&" * 30
         return self.view(*args, **kwargs)
 
 
@@ -75,3 +75,18 @@ def favicon():
     #提供展示静态文件方式，eg:图片，文件等
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'aa.jpg', mimetype='image/vnd.microsoft.icon')
+
+# 返回流对象给客户端
+from flask import Response, stream_with_context
+# Response对象的初始化，可以是个字符串，也可以是个可迭代的对象；
+# 如果是字符串，返回这个字符串，如果是可迭代对象，就返回迭代对象的全部的值
+# stream_with_context生成器运行期间保持请求环境
+@app.route('/large.csv')
+def generate_large_csv():
+    # 定义一个生成器，generate()象返回生成器对，generate().next返回每次yield的值
+    # 但是，将生成器对象传回到Response中，将返回生成器生成的全部内容
+    def generate():
+        yield 'hello \n'
+        yield 'world \n'
+        yield '!'
+    return Response(stream_with_context(generate()), mimetype='text/csv')
