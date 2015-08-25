@@ -1,0 +1,38 @@
+
+127.0.0.1 - - [01/Jun/2015 15:49:12] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [01/Jun/2015 15:49:12] "GET /static/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [01/Jun/2015 15:49:12] "GET /favicon.ico HTTP/1.1" 404 -
+2015-06-01 17:52:02,594 ERROR: Exception on / [GET] [in C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py:1423]
+Traceback (most recent call last):
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1473, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1666, in preprocess_request
+    rv = func()
+  File "flaskr.py", line 72, in before_request
+    g.db = connect_db()
+  File "flaskr.py", line 62, in connect_db
+    return sqlite3.connect(app.config['DATABASE'])
+KeyError: 'DATABASE'
+2015-06-01 17:52:18,926 ERROR: Exception on / [GET] [in C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py:1423]
+Traceback (most recent call last):
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1473, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1666, in preprocess_request
+    rv = func()
+  File "flaskr.py", line 72, in before_request
+    g.db = connect_db()
+  File "flaskr.py", line 62, in connect_db
+    return sqlite3.connect(app.config['DATABASE'])
+KeyError: 'DATABASE'
