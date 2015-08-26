@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
@@ -36,7 +39,9 @@ class Tyre(db.Model):
     __tablename__ = 'tyres'
     tyre_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     car_id = db.Column(db.Integer, db.ForeignKey('cars.id'), primary_key=True)
-    car = db.relationship('Car', backref='tyres')
+    # car_id和Car是外键关联，Tyre中的数据是依赖Car中的，这里添加relationship关系时给form用的
+    # 这样form中返回car字段，就可以使用搜索功能，如果没有添加Car数据，car_id是不会被添加的
+    car = db.relationship('Car')
     desc = db.Column(db.String(50))
 
 
@@ -57,6 +62,7 @@ admin.add_view(TyreAdmin(Tyre, db.session))
 if __name__ == '__main__':
 
     # Create DB
+    db.drop_all()
     db.create_all()
 
     # Start app

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+
 import os
 import os.path as op
 from flask import Flask
@@ -38,11 +41,18 @@ class User(db.Model):
 
 
 # Create M2M table
+# 建立两张表的关系，在添加Post表数据时，添加post_id和tag.id的映射关系
 post_tags_table = db.Table('post_tags', db.Model.metadata,
                            db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
                            db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'))
                            )
 
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64))
+
+    def __unicode__(self):
+        return self.name
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -51,20 +61,18 @@ class Post(db.Model):
     date = db.Column(db.DateTime)
 
     user_id = db.Column(db.Integer(), db.ForeignKey(User.id))
-    user = db.relationship(User, backref='posts')
+    # 如果不写backref在Car表添加数据时，没有Post title这个字段；同时Post类要有__unicode__这个方法，
+    # 标识在Car添加数据时，页面中显示的Post表中的字段；这个字段必须是字符类型的
+    user = db.relationship(User, backref='post_titile')
 
-    tags = db.relationship('Tag', secondary=post_tags_table)
+    # secondary参数用来将映射关系写到哪个数据表中，post_tags_table是这个表名
+    tags = db.relationship(Tag, secondary=post_tags_table)
 
     def __unicode__(self):
         return self.title
 
 
-class Tag(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64))
 
-    def __unicode__(self):
-        return self.name
 
 
 class UserInfo(db.Model):
@@ -98,6 +106,8 @@ def index():
 
 # Customized User model admin
 class UserAdmin(sqla.ModelView):
+    # 如果没有使用inline_models，添加User信息的时候，info的字段是'%s - %s' % (self.key, self.value)这个格式
+    # 但是使用了inline_models后，Userinfo字段信息皆可以被提出来显示
     inline_models = (UserInfo, )
 
 
@@ -122,6 +132,8 @@ class PostAdmin(sqla.ModelView):
 
     # Pass arguments to WTForms. In this case, change label for text field to
     # be 'Big Text' and add required() validator.
+    # 修改添加数据时字段的限制，同时指定添加字段的搜索按照那些字段搜索
+    # Post添加user时按照User.username, User.email两个字段搜索
     form_args = dict(
                     text=dict(label='Big Text', validators=[validators.required()])
                 )
@@ -162,10 +174,11 @@ def build_sample_db():
     import random
     import datetime
 
-    db.drop_all()
+    # db.drop_all()
     db.create_all()
 
     # Create sample Users
+    '''
     first_names = [
         'Harry', 'Amelia', 'Oliver', 'Jack', 'Isabella', 'Charlie', 'Sophie', 'Mia',
         'Jacob', 'Thomas', 'Emily', 'Lily', 'Ava', 'Isla', 'Alfie', 'Olivia', 'Jessica',
@@ -261,13 +274,14 @@ def build_sample_db():
 
     db.session.commit()
     return
+    '''
 
 if __name__ == '__main__':
     # Build a sample db on the fly, if one does not exist yet.
     # app_dir = op.realpath(os.path.dirname(__file__))
     # database_path = op.join(app_dir, app.config['DATABASE_FILE'])
     # if not os.path.exists(database_path):
-    # build_sample_db()
+    build_sample_db()
 
     # Start app
     app.run(debug=True)
