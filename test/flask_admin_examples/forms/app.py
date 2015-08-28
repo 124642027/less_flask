@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+
 import os
 import os.path as op
 
@@ -52,6 +55,7 @@ class Image(db.Model):
 
 
 class User(db.Model):
+    __tablename__ = "user_forms"
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.Unicode(64))
     last_name = db.Column(db.Unicode(64))
@@ -63,6 +67,7 @@ class User(db.Model):
 
 
 # Delete hooks for models, delete files if models are getting deleted
+# listens_for的第一个参数是监听的模板类名，第二个参数是控制删除顺序;在File类删除后执行删除文件操作
 @listens_for(File, 'after_delete')
 def del_file(mapper, connection, target):
     if target.path:
@@ -93,15 +98,17 @@ def del_image(mapper, connection, target):
 # Administrative views
 class FileView(sqla.ModelView):
     # Override form field to use Flask-Admin FileUploadField
+    # 在添加和修改功能中添加上传文件功能，上传的路径存到path字段上
     form_overrides = {
         'path': form.FileUploadField
     }
 
     # Pass additional parameters to 'path' to FileUploadField constructor
+    # 重写form中字段的属性，这里重写字段的参数
     form_args = {
         'path': {
-            'label': 'File',
-            'base_path': file_path
+            'label': 'File',           # 上传文件的类型
+            'base_path': file_path     # 上传文件存储的路径
         }
     }
 
@@ -110,10 +117,13 @@ class ImageView(sqla.ModelView):
     def _list_thumbnail(view, context, model, name):
         if not model.path:
             return ''
-
+        # Markup从jinjia2中引入，阻止自动转义
         return Markup('<img src="%s">' % url_for('static',
                                                  filename=form.thumbgen_filename(model.path)))
 
+    # 格式化返回的字段的格式；此处将返回的图片地址格式化成html返回到页面
+    # column_formatters被dict对象赋值，path返回的字段，_list_thumbnail格式化方法，这个方法固定有4个入参
+    # 字段也可以添加如下限制dict(label='Big Text', validators=[validators.required()]，限制类型和是否必填
     column_formatters = {
         'path': _list_thumbnail
     }
@@ -131,6 +141,7 @@ class UserView(sqla.ModelView):
     """
     This class demonstrates the use of 'rules' for controlling the rendering of forms.
     """
+    # 定制弹出的form格式，定义fieldset，分类header和field
     form_create_rules = [
         # Header and four fields. Email field will go above phone field.
         rules.FieldSet(('first_name', 'last_name', 'email', 'phone'), 'Personal'),
@@ -140,6 +151,9 @@ class UserView(sqla.ModelView):
         # String is resolved to form field, so there's no need to explicitly use `rules.Field`
         'country',
         # Show macro from Flask-Admin lib.html (it is included with 'lib' prefix)
+        # 使用页面中定义的宏（macro）,rule_demo是在rule_create.html和rule_edit.html中引入的rule_demo.html页面的重命名
+        # {% import 'rule_demo.html' as rule_demo %}这里使用rule_demo.warp方法，同时保证wrap方法中有{{ caller() }}
+        # 表明可调用
         rules.Container('rule_demo.wrap', rules.Field('notes'))
     ]
 

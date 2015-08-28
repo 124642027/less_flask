@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+
 import os
 import os.path as op
 from flask import Flask
@@ -14,14 +17,15 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = '123456790'
 
 # Create in-memory database
-app.config['DATABASE_FILE'] = 'sample_db.sqlite'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + app.config['DATABASE_FILE']
+# app.config['DATABASE_FILE'] = 'sample_db.sqlite'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqldb://root:root@localhost:3306/test'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 
 
 # Models
 class User(db.Model):
+    __tablename__ = "user_layout"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64))
     email = db.Column(db.Unicode(64))
@@ -41,9 +45,10 @@ class Page(db.Model):
 
 # Customized admin interface
 class CustomView(ModelView):
-    list_template = 'list.html'
-    create_template = 'create.html'
-    edit_template = 'edit.html'
+    # 使用list_template和create_template或edit_template来定制查看新建修改页；提供了很大的重用行
+    list_template = 'micro_list.html'
+    #create_template = 'create.html'
+    #edit_template = 'edit.html'
 
 
 class UserAdmin(CustomView):
@@ -58,7 +63,7 @@ def index():
 
 
 # Create admin with custom base template
-admin = admin.Admin(app, 'Example: Layout', base_template='layout.html')
+admin = admin.Admin(app, 'Example: Layout', base_template='micro_layout.html')
 
 # Add views
 admin.add_view(UserAdmin(User, db.session))
@@ -140,10 +145,10 @@ def build_sample_db():
 if __name__ == '__main__':
 
     # Build a sample db on the fly, if one does not exist yet.
-    app_dir = op.realpath(os.path.dirname(__file__))
-    database_path = op.join(app_dir, app.config['DATABASE_FILE'])
-    if not os.path.exists(database_path):
-        build_sample_db()
+    # app_dir = op.realpath(os.path.dirname(__file__))
+    # database_path = op.join(app_dir, app.config['DATABASE_FILE'])
+    # if not os.path.exists(database_path):
+    # build_sample_db()
 
     # Start app
     app.run(debug=True)
